@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CalcBot</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!--The phone phram -->>
+  <div class="phone-frame">
+    <div class="phone-screen">
+
+      <!-- THe main logo -->
+      <div class="card-container">
+
+        <h1 class="logo">CalcBot</h1>
+
+        <!-- The buttons for the signin or create account -->
+        <div class="tab-row">
+          <button id="tab-login" class="tab active">Sign In</button>
+          <button id="tab-signup" class="tab">Create Account</button>
+        </div>
+
+        <!--  header for the type in  -->
+        <h2 id="header-text" class="header">Sign in to your account</h2>
+        <p id="subheader-text" class="subheader">Enter your email and password</p>
+
+        <!-- Login / Signup Form -->
+        <form id="main-form" class="form">
+
+          <!-- Email -->
+          <input 
+            type="email" 
+            id="main-email" 
+            class="input"
+            placeholder="email@domain.com"
+            required 
+          />
+
+          <!-- Password with the show and hide option -->
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="main-password" 
+              class="input" 
+              placeholder="Password"
+              required 
+            />
+            <span class="toggle-password" data-target="main-password">👁</span>
+          </div>
+
+          <!-- Submit the login or sign in -->
+          <button type="submit" id="main-button" class="btn-primary">
+            Sign In
+          </button>
+        </form>
+
+        <!-- Forgot Password -->
+        <button id="forgot" class="forgot-link">Forgot password?</button>
+
+        <!-- Reset Password part -->
+        <div id="reset-section" class="hidden reset-box">
+          <input 
+            type="email" 
+            id="reset-email" 
+            class="input" 
+            placeholder="Enter your email"
+          />
+          <button id="reset-btn" class="btn-primary">Reset Password</button>
+        </div>
+
+      </div>
+
+      <!-- THe pop up for when resting the password -->
+      <div id="popup" class="popup hidden">
+        <div class="popup-content">
+          <h3>Enter New Password</h3>
+
+          <!-- THe new password has the show or dont show button -->
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="new-password" 
+              class="input" 
+              placeholder="New Password" 
+            />
+            <span class="toggle-password" data-target="new-password">👁</span>
+          </div>
+
+          <button id="submit-new-password" class="btn-primary">Submit</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Links to the java file -->
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
