@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CalcBot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .phone-container {
+      width: 100%;
+      max-width: 375px;
+      height: 667px;
+      background: white;
+      border-radius: 40px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 25px;
+      background: white;
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 25px;
+      background: #1a1a1a;
+      border-radius: 0 0 15px 15px;
+      z-index: 11;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .camera {
+      width: 8px;
+      height: 8px;
+      background: #333;
+      border-radius: 50%;
+    }
+
+    .speaker {
+      width: 35px;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+      color: white;
+      padding: 35px 20px 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+
+    .header-info h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-info p {
+      font-size: 13px;
+      color: #e9d5ff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #f472b6 0%, #a855f7 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #fafafa;
+    }
+
+    .messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 10px;
+    }
+
+    .message {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+      margin-left: auto;
+    }
+
+    .message.assistant {
+      flex-direction: row;
+    }
+
+    .message-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .message.user .message-avatar {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    }
+
+    .message.assistant .message-avatar {
+      background: linear-gradient(135deg, #f472b6 0%, #a855f7 100%);
+    }
+
+    .message-content {
+      max-width: 70%;
+    }
+
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+
+    .message.assistant .message-bubble {
+      background: white;
+      color: #1f2937;
+      border-bottom-left-radius: 6px;
+      border: 1px solid #f3f4f6;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    .input-container {
+      padding: 16px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .quick-actions::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .quick-actions::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 10px;
+    }
+
+    .quick-btn {
+      padding: 8px 14px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #6b7280;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .quick-btn:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 28px;
+      padding: 6px 8px 6px 18px;
+      gap: 8px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: #a855f7;
+      background: white;
+    }
+
+    #messageInput {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      padding: 8px 0;
+      color: #1f2937;
+    }
+
+    #messageInput::placeholder {
+      color: #9ca3af;
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    #sendBtn {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    #sendBtn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+    }
+
+    #sendBtn:disabled {
+      background: #d1d5db;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #9ca3af;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-container">
+    <div class="notch">
+      <div class="camera"></div>
+      <div class="speaker"></div>
+    </div>
+
+    <div class="header">
+      <div class="header-info">
+        <h1>CalcBot</h1>
+        <p><span class="status-dot"></span> Online</p>
+      </div>
+      <div class="avatar">🤖</div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="message assistant">
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div class="message-bubble">
+            Hi! I'm CalcBot, your AI math tutor. Ask me anything from basic arithmetic to calculus, and I'll help you understand step by step! 📐✨
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="quickMessage('Explain algebra basics')">📚 Algebra</button>
+        <button class="quick-btn" onclick="quickMessage('Help with geometry')">📐 Geometry</button>
+        <button class="quick-btn" onclick="quickMessage('Solve this equation')">🔢 Equations</button>
+        <button class="quick-btn" onclick="quickMessage('Calculus help')">∫ Calculus</button>
+      </div>
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          id="messageInput" 
+          placeholder="Ask me a math question..."
+          autocomplete="off"
+        >
+        <div class="input-actions">
+          <button id="sendBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = 'ADD YOUR_API_KEY_HERE';
+    
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    let isLoading = false;
+
+    function getTime() {
+      const now = new Date();
+      return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+
+    function addMessage(role, content, showTime) {
+      if (showTime === undefined) showTime = true;
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message ' + role;
+      
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = role === 'user' ? '👤' : '🤖';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'message-bubble';
+      bubbleDiv.textContent = content;
+      
+      contentDiv.appendChild(bubbleDiv);
+      
+      if (showTime && content !== 'Thinking...') {
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        timeDiv.textContent = getTime();
+        contentDiv.appendChild(timeDiv);
+      }
+      
+      messageDiv.appendChild(avatar);
+      messageDiv.appendChild(contentDiv);
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      
+      return messageDiv;
+    }
+
+    function addTypingIndicator() {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message assistant';
+      messageDiv.id = 'typing-indicator';
+      
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = '🤖';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'message-bubble';
+      
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'typing-indicator';
+      typingDiv.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      
+      bubbleDiv.appendChild(typingDiv);
+      contentDiv.appendChild(bubbleDiv);
+      messageDiv.appendChild(avatar);
+      messageDiv.appendChild(contentDiv);
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      
+      return messageDiv;
+    }
+
+    function quickMessage(text) {
+      messageInput.value = text;
+      messageInput.focus();
+    }
+
+    async function sendMessage() {
+      const userMessage = messageInput.value.trim();
+      if (!userMessage || isLoading) return;
+
+      if (API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
+        addMessage('assistant', 'Please add your Groq API key in the code! Visit https://console.groq.com/ to get one for free.');
+        return;
+      }
+
+      addMessage('user', userMessage);
+      messageInput.value = '';
+      isLoading = true;
+      sendBtn.disabled = true;
+
+      const typingIndicator = addTypingIndicator();
+
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + API_KEY
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [{
+              role: 'user',
+              content: 'You are a helpful math tutor. A student asked: "' + userMessage + '". Provide a clear, step-by-step explanation. Be VERY concise - aim for 50-100 words, maximum 200 words. Be encouraging and use simple language.'
+            }],
+            max_tokens: 500
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+          const assistantMessage = data.choices[0].message.content;
+          typingIndicator.remove();
+          addMessage('assistant', assistantMessage);
+        } else {
+          throw new Error('Invalid response from API');
+        }
+      } catch (error) {
+        typingIndicator.remove();
+        addMessage('assistant', 'Sorry, I encountered an error. Please check your API key!');
+        console.error('Error:', error);
+      } finally {
+        isLoading = false;
+        sendBtn.disabled = false;
+        messageInput.focus();
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    messageInput.focus();
+  </script>
+</body>
+</html>
